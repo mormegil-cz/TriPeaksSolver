@@ -28,12 +28,17 @@ namespace TriPeaksSolver
         {
             using (var reader = new StreamReader(filename))
             {
-                var peaksStr = reader.ReadLine();
-                var deckSizeStr = reader.ReadLine();
-                var deckSize = Int32.Parse(deckSizeStr, CultureInfo.InvariantCulture);
-                var deckStr = reader.ReadLine();
-                return new TriPeaksGame(ParseCards(peaksStr), ParseCards(deckStr));
+                return LoadFromFile(reader);
             }
+        }
+
+        public static TriPeaksGame LoadFromFile(TextReader reader)
+        {
+            var peaksStr = reader.ReadLine();
+            var deckSizeStr = reader.ReadLine();
+            var deckSize = Int32.Parse(deckSizeStr, CultureInfo.InvariantCulture);
+            var deckStr = reader.ReadLine();
+            return new TriPeaksGame(ParseCards(peaksStr), ParseCards(deckStr));
         }
 
         private static byte[] ParseCards(string line)
@@ -127,6 +132,7 @@ namespace TriPeaksSolver
                 result.Append(PrintCard(state.CardsOut, i));
                 result.Append("     ");
             }
+
             result.AppendLine();
             result.Append("  ");
             for (int i = 0; i < 2; ++i)

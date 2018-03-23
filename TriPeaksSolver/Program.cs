@@ -6,10 +6,20 @@ namespace TriPeaksSolver
     {
         static void Main(string[] args)
         {
-            var game = TriPeaksGame.LoadFromFile("game.txt");
-            foreach (var state in game.ComputeFollowingStates(game.CreateInitialState()))
+            try
             {
-                Console.WriteLine(state);
+                var game = args.Length == 0
+                    ? TriPeaksGame.LoadFromFile(Console.In)
+                    : TriPeaksGame.LoadFromFile(args[0]);
+
+                foreach (var state in game.ComputeFollowingStates(game.CreateInitialState()))
+                {
+                    Console.WriteLine(state);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(e.Message);
             }
         }
     }
