@@ -5,16 +5,18 @@ namespace TriPeaksSolver
 {
     public struct GameState
     {
-        public readonly ulong CardsOut;
-        public readonly int DeckPosition;
+        public readonly uint CardsOut;
+        public readonly sbyte DeckPosition;
         public readonly byte CurrentCard;
 
-        public GameState(ulong cardsOut, int deckPosition, byte currentCard)
+        public GameState(uint cardsOut, sbyte deckPosition, byte currentCard)
         {
             CardsOut = cardsOut;
             DeckPosition = deckPosition;
             CurrentCard = currentCard;
         }
+
+        public bool IsSolved => CardsOut == (1U << 28) - 1;
 
         public bool Equals(GameState other)
         {
@@ -28,7 +30,7 @@ namespace TriPeaksSolver
 
         public override int GetHashCode()
         {
-            return CardsOut.GetHashCode() ^ DeckPosition.GetHashCode() ^ CurrentCard;
+            return CardsOut.GetHashCode() ^ ((DeckPosition << 8) | CurrentCard);
         }
     }
 }

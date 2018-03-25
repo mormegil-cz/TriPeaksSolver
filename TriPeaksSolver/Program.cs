@@ -11,11 +11,11 @@ namespace TriPeaksSolver
                 var game = args.Length == 0
                     ? TriPeaksGame.LoadFromFile(Console.In)
                     : TriPeaksGame.LoadFromFile(args[0]);
-
-                foreach (var state in game.ComputeFollowingStates(game.CreateInitialState()))
-                {
-                    Console.WriteLine(state);
-                }
+                var depthFirstSearch = new DepthFirstSearch(game);
+                if (depthFirstSearch.Solve())
+                    Console.WriteLine("Solved!");
+                else
+                    Console.WriteLine("Unsolved");
             }
             catch (Exception e)
             {

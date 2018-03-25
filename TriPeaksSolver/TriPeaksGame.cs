@@ -16,10 +16,12 @@ namespace TriPeaksSolver
          */
 
         private static readonly sbyte[] firstNeighbor =
-            {3, 5, 7, 9, 10, 12, 13, 15, 16, 18, 19, 20, 21, 22, 23, 24, 25, 26};
+            { 3, 5, 7, 9, 10, 12, 13, 15, 16, 18, 19, 20, 21, 22, 23, 24, 25, 26 };
 
         private static readonly sbyte[] secondNeighbor =
-            {4, 6, 8, 10, 11, 13, 14, 16, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27};
+            { 4, 6, 8, 10, 11, 13, 14, 16, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27 };
+
+        private static readonly String cardNames = "?A23456789TJQK";
 
         private readonly byte[] peaks;
         private readonly byte[] deck;
@@ -56,28 +58,7 @@ namespace TriPeaksSolver
         private static byte ParseCard(string cardStr)
         {
             char card = cardStr[0];
-            if (card >= '2' && card <= '9')
-            {
-                return (byte) ((int) card - (int) '0');
-            }
-            else
-            {
-                switch (Char.ToUpperInvariant(card))
-                {
-                    case 'T':
-                        return 10;
-                    case 'J':
-                        return 11;
-                    case 'Q':
-                        return 12;
-                    case 'K':
-                        return 13;
-                    case 'A':
-                        return 1;
-                    default:
-                        throw new FormatException();
-                }
-            }
+            return (byte) cardNames.IndexOf(card);
         }
 
         public TriPeaksGame(byte[] peaks, byte[] deck)
@@ -95,58 +76,90 @@ namespace TriPeaksSolver
         {
             for (var i = 0; i < firstNeighbor.Length; ++i)
             {
-                if ((state.CardsOut & (1UL << i)) == 0
-                    && (state.CardsOut & (1UL << firstNeighbor[i])) != 0
-                    && (state.CardsOut & (1UL << secondNeighbor[i])) != 0)
+                if ((state.CardsOut & (1U << i)) == 0
+                    && (state.CardsOut & (1U << firstNeighbor[i])) != 0
+                    && (state.CardsOut & (1U << secondNeighbor[i])) != 0)
                 {
-                    if ((13 + state.CurrentCard - peaks[i]) % 13 == 1)
+                    int diff = (13 + state.CurrentCard - peaks[i]) % 13;
+                    if (diff == 1 || diff == 12)
                     {
-                        yield return new GameState(state.CardsOut | (1UL << i), state.DeckPosition, peaks[i]);
+                        yield return new GameState(state.CardsOut | (1U << i), state.DeckPosition, peaks[i]);
                     }
                 }
             }
 
             for (int i = 18; i <= 27; ++i)
             {
-                if ((state.CardsOut & (1UL << i)) == 0)
+                if ((state.CardsOut & (1U << i)) == 0)
                 {
-                    if ((13 + state.CurrentCard - peaks[i]) % 13 == 1)
+                    int diff = (13 + state.CurrentCard - peaks[i]) % 13;
+                    if (diff == 1 || diff == 12)
                     {
-                        yield return new GameState(state.CardsOut | (1UL << i), state.DeckPosition, peaks[i]);
+                        yield return new GameState(state.CardsOut | (1U << i), state.DeckPosition, peaks[i]);
                     }
                 }
             }
 
             if (state.DeckPosition < deck.Length)
             {
-                yield return new GameState(state.CardsOut, state.DeckPosition + 1, deck[state.DeckPosition]);
+                yield return new GameState(state.CardsOut, (sbyte) (state.DeckPosition + 1), deck[state.DeckPosition]);
             }
         }
 
         public string PrintState(GameState state)
         {
             var result = new StringBuilder();
-            result.Append("   ");
-            for (int i = 0; i < 2; ++i)
+            for (int i = 0; i < 3; ++i)
             {
-                result.Append(PrintCard(state.CardsOut, i));
-                result.Append("     ");
-            }
-
-            result.AppendLine();
-            result.Append("  ");
-            for (int i = 0; i < 2; ++i)
-            {
-                result.Append(PrintCard(state.CardsOut, i));
                 result.Append("   ");
+                result.Append(PrintCard(state.CardsOut, i));
+                result.Append(' ');
             }
+            result.AppendLine();
+            for (int i = 0; i < 3; ++i)
+            {
+                result.Append("  ");
+                for (int j = 0; j < 2; ++j)
+                {
+                    result.Append(PrintCard(state.CardsOut, i * 2 + j + 3));
+                    result.Append(' ');
+                }
+            }
+            result.AppendLine();
+            for (int i = 0; i < 9; ++i)
+            {
+                result.Append(' ');
+                result.Append(PrintCard(state.CardsOut, 9 + i));
+            }
+            result.AppendLine();
+            for (int i = 0; i < 10; ++i)
+            {
+                result.Append(PrintCard(state.CardsOut, 18 + i));
+                result.Append(' ');
+            }
+            result.AppendLine();
+            result.AppendLine();
+            result.Append(" [");
+            result.Append(cardNames[state.CurrentCard]);
+            result.Append("] ");
+            for (int i = state.DeckPosition; i < deck.Length; ++i)
+            {
+                result.Append(cardNames[deck[i]]);
+                result.Append(' ');
+            }
+            result.AppendLine();
+            return result.ToString();
+        }
 
-/*
- *    0     1     2
- *   3 4   5 6   7 8
- *  9 A B C D E F G H
- * I J K L M N O P Q R
- */
+        private char PrintCard(uint cardsOut, int index)
+        {
+            return (cardsOut & (1U << index)) == 0 ? cardNames[peaks[index]] : '_';
+        }
+
+        public bool IsUnsolvable(GameState state)
+        {
+            // TODO
+            return false;
         }
     }
 }
